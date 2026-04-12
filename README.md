@@ -1,6 +1,8 @@
 # k8s-microservices-demo
 
-Orquestração de microsserviços com **Kubernetes** (Minikube), demonstrando deployment de dois serviços Spring Boot com PostgreSQL e Apache Kafka em um cluster local. Projeto de portfólio focado em infraestrutura cloud-native.
+[![CI - Validate Kubernetes Manifests](https://github.com/leonlimask20-dot/k8s-microservices-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/leonlimask20-dot/k8s-microservices-demo/actions/workflows/ci.yml)
+
+Orquestração de microsserviços com **Kubernetes** (Minikube), demonstrando deployment de dois serviços Spring Boot com PostgreSQL e Apache Kafka em um cluster local. Projeto de portfólio ficado em infraestrutura cloud-native.
 
 ## Stack
 
