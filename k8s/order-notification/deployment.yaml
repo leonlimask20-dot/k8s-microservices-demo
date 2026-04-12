@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-notification
+  namespace: microservices
+  labels:
+    app: order-notification
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-notification
+  template:
+    metadata:
+      labels:
+        app: order-notification
+    spec:
+      containers:
+        - name: order-notification
+          image: order-notification-service:latest
+          imagePullPolicy: Never  # Usa imagem local do Minikube
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: order-notification-config
+          env:
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+          readinessProbe:
+            httpGet:
+              path: /api/v1/notifications
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 10
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /api/v1/notifications
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

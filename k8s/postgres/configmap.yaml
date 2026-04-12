@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: microservices
+data:
+  # Script executado na primeira inicializacao do PostgreSQL
+  # Cria os dois bancos de dados necessarios para os servicos
+  init.sql: |
+    CREATE DATABASE orderprocessing;
+    CREATE DATABASE notificationdb;

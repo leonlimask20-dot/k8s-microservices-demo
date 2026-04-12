@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-notification-config
+  namespace: microservices
+data:
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/notificationdb"
+  SPRING_DATASOURCE_USERNAME: "postgres"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+  SPRING_JPA_SHOW_SQL: "false"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"
+  SPRING_KAFKA_CONSUMER_GROUP_ID: "notification-service-group"
+  KAFKA_TOPICS_ORDER_PLACED: "order-placed-events"
+  KAFKA_TOPICS_ORDER_CANCELLED: "order-cancelled-events"

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-processing-config
+  namespace: microservices
+data:
+  # Sobrescreve o application.properties via variaveis de ambiente
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/orderprocessing"
+  SPRING_DATASOURCE_USERNAME: "postgres"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+  SPRING_JPA_SHOW_SQL: "false"
