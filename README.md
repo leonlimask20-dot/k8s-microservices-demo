@@ -2,7 +2,9 @@
 
 [![CI - Validate Kubernetes Manifests](https://github.com/leonlimask20-dot/k8s-microservices-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/leonlimask20-dot/k8s-microservices-demo/actions/workflows/ci.yml)
 
-Orquestração de microsserviços com **Kubernetes** (Minikube), demonstrando deployment de dois serviços Spring Boot com PostgreSQL e Apache Kafka em um cluster local. Projeto de portfólio ficado em infraestrutura cloud-native.
+Microservices orchestration with **Kubernetes** (Minikube), demonstrating the
+deployment of two Spring Boot services with PostgreSQL and Apache Kafka on a
+local cluster. Portfolio project focused on cloud-native infrastructure.
 
 ## Stack
 
@@ -13,7 +15,7 @@ Orquestração de microsserviços com **Kubernetes** (Minikube), demonstrando de
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-29.x-2496ED?style=flat&logo=docker&logoColor=white)
 
-## Arquitetura
+## Architecture
 
 ```
                           Ingress (nginx)
@@ -33,112 +35,113 @@ Orquestração de microsserviços com **Kubernetes** (Minikube), demonstrando de
                                                    + DLQ topics
 ```
 
-## Recursos Kubernetes
+## Kubernetes resources
 
-| Recurso | Descrição |
+| Resource | Description |
 |---|---|
-| `Namespace` | Isolamento em `microservices` |
-| `StatefulSet` | PostgreSQL + Kafka com armazenamento persistente |
-| `Deployment` | Ambos os microsserviços com rolling update |
-| `HPA` | Autoscaling CPU 70% — min 1 / max 3 réplicas |
-| `Service (ClusterIP)` | Comunicação interna entre serviços |
-| `Service (Headless)` | DNS estável para StatefulSets |
-| `Ingress (nginx)` | Roteamento externo por hostname |
-| `ConfigMap` | Configuração de ambiente injetada via env vars |
-| `Secret` | Credenciais do PostgreSQL em base64 |
+| `Namespace` | Isolation in `microservices` |
+| `StatefulSet` | PostgreSQL + Kafka with persistent storage |
+| `Deployment` | Both microservices with rolling update |
+| `HPA` | CPU autoscaling at 70% — min 1 / max 3 replicas |
+| `Service (ClusterIP)` | Internal communication between services |
+| `Service (Headless)` | Stable DNS for StatefulSets |
+| `Ingress (nginx)` | External routing by hostname |
+| `ConfigMap` | Environment configuration injected via env vars |
+| `Secret` | PostgreSQL credentials in base64 |
 
-## Pré-requisitos
+## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/) (`winget install Kubernetes.minikube`)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/) (incluído no Minikube)
-- [order-processing-api](https://github.com/leonlimask20-dot/order-processing-api) clonado em `C:\projetos\`
-- [order-notification-service](https://github.com/leonlimask20-dot/order-notification-service) clonado em `C:\projetos\`
+- [kubectl](https://kubernetes.io/docs/tasks/tools/) (included with Minikube)
+- [order-processing-api](https://github.com/leonlimask20-dot/order-processing-api) cloned into `C:\projetos\`
+- [order-notification-service](https://github.com/leonlimask20-dot/order-notification-service) cloned into `C:\projetos\`
 
-## Como executar
+## How to run
 
-### 1. Iniciar o Minikube
+### 1. Start Minikube
 
 ```powershell
 minikube start --driver=docker
 ```
 
-### 2. Build das imagens (dentro do daemon do Minikube)
+### 2. Build the images (inside the Minikube daemon)
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\scripts\build-images.ps1
 ```
 
-### 3. Deploy no cluster
+### 3. Deploy to the cluster
 
 ```powershell
 .\scripts\deploy.ps1
 ```
 
-O script habilita o addon Ingress automaticamente e aguarda cada componente ficar pronto antes de prosseguir.
+The script enables the Ingress addon automatically and waits for each component
+to become ready before proceeding.
 
-### 4. Configurar o arquivo hosts
+### 4. Configure the hosts file
 
-Adicione ao `C:\Windows\System32\drivers\etc\hosts` (requer PowerShell como Administrador):
+Add to `C:\Windows\System32\drivers\etc\hosts` (requires PowerShell as Administrator):
 
 ```
 127.0.0.1  orders.microservices.local
 127.0.0.1  notifications.microservices.local
 ```
 
-### 5. Iniciar o túnel do Minikube (novo terminal, deixar aberto)
+### 5. Start the Minikube tunnel (new terminal, keep it open)
 
 ```powershell
 minikube tunnel
 ```
 
-### 6. Verificar status do cluster
+### 6. Check the cluster status
 
 ```powershell
 .\scripts\status.ps1
 ```
 
-## Testando a API
+## Testing the API
 
-### Criar pedido (order-processing)
+### Create order (order-processing)
 
 ```powershell
 Invoke-RestMethod -Uri "http://orders.microservices.local/api/v1/orders" `
   -Method POST `
   -ContentType "application/json" `
-  -Body '{"customerId":"cliente-01","items":[{"productId":"prod-1","productName":"Teclado","quantity":2,"unitPrice":150.00}]}'
+  -Body '{"customerId":"customer-01","items":[{"productId":"prod-1","productName":"Keyboard","quantity":2,"unitPrice":150.00}]}'
 ```
 
-**Resposta:**
+**Response:**
 ```json
 {
   "id": "9e5a2915-9c55-4927-8e45-bd42584c58f7",
-  "customerId": "cliente-01",
+  "customerId": "customer-01",
   "status": "PENDING",
   "total": 300.00,
   "items": [...]
 }
 ```
 
-### Simular eventos Kafka (order-notification)
+### Simulate Kafka events (order-notification)
 
 ```powershell
-# Publicar evento de pedido criado
+# Publish an order-placed event
 Invoke-RestMethod -Uri "http://notifications.microservices.local/api/v1/simulate/order-placed" `
   -Method POST -ContentType "application/json" `
-  -Body '{"orderId":"pedido-001","customerId":"cliente-01"}'
+  -Body '{"orderId":"order-001","customerId":"customer-01"}'
 
-# Publicar evento de pedido cancelado
+# Publish an order-cancelled event
 Invoke-RestMethod -Uri "http://notifications.microservices.local/api/v1/simulate/order-cancelled" `
   -Method POST -ContentType "application/json" `
-  -Body '{"orderId":"pedido-001","customerId":"cliente-01"}'
+  -Body '{"orderId":"order-001","customerId":"customer-01"}'
 
-# Listar notificações geradas
+# List the generated notifications
 Invoke-RestMethod -Uri "http://notifications.microservices.local/api/v1/notifications" -Method GET
 ```
 
-## Estrutura do repositório
+## Repository structure
 
 ```
 k8s-microservices-demo/
@@ -148,11 +151,11 @@ k8s-microservices-demo/
 │   ├── hpa.yaml
 │   ├── postgres/
 │   │   ├── secret.yaml
-│   │   ├── configmap.yaml        # init.sql cria os dois bancos
+│   │   ├── configmap.yaml        # init.sql creates both databases
 │   │   ├── statefulset.yaml
 │   │   └── service.yaml          # Headless
 │   ├── kafka/
-│   │   ├── statefulset.yaml      # KRaft mode (sem ZooKeeper)
+│   │   ├── statefulset.yaml      # KRaft mode (no ZooKeeper)
 │   │   └── service.yaml          # Headless
 │   ├── order-processing/
 │   │   ├── configmap.yaml
@@ -163,24 +166,34 @@ k8s-microservices-demo/
 │       ├── deployment.yaml
 │       └── service.yaml
 └── scripts/
-    ├── build-images.ps1           # Build Docker no daemon do Minikube
-    ├── deploy.ps1                 # Apply de todos os manifests em ordem
-    └── status.ps1                 # Overview do cluster
+    ├── build-images.ps1           # Build Docker images in the Minikube daemon
+    ├── deploy.ps1                 # Apply all manifests in order
+    └── status.ps1                 # Cluster overview
 ```
 
-## Conceitos demonstrados
+## Concepts demonstrated
 
-- **Multi-stage Docker build** — imagem de produção mínima com JRE Alpine (~180MB)
-- **StatefulSet vs Deployment** — StatefulSet para workloads com estado (DB, Kafka), Deployment para apps stateless
-- **Headless Service** — DNS estável para pods de StatefulSets (`postgres-service`, `kafka-service`)
-- **imagePullPolicy: Never** — uso de imagens locais no Minikube sem registry externo
-- **ConfigMap como override** — variáveis de ambiente sobrescrevem `application.properties` do Spring Boot
-- **Secret para credenciais** — senhas nunca em texto no manifest, injetadas via `secretKeyRef`
-- **HPA** — Horizontal Pod Autoscaler baseado em CPU com métricas do metrics-server
-- **Readiness / Liveness Probes** — Kubernetes só roteia tráfego para pods saudáveis
-- **Kafka KRaft mode** — Kafka sem ZooKeeper (modo nativo desde Kafka 3.x)
+- **Multi-stage Docker build** — minimal production image with Alpine JRE (~180MB)
+- **StatefulSet vs Deployment** — StatefulSet for stateful workloads (DB, Kafka), Deployment for stateless apps
+- **Headless Service** — stable DNS for StatefulSet pods (`postgres-service`, `kafka-service`)
+- **imagePullPolicy: Never** — using local images in Minikube without an external registry
+- **ConfigMap as override** — environment variables override Spring Boot's `application.properties`
+- **Secret for credentials** — passwords never in plain text in the manifest, injected via `secretKeyRef`
+- **HPA** — Horizontal Pod Autoscaler based on CPU with metrics-server
+- **Readiness / Liveness Probes** — Kubernetes only routes traffic to healthy pods
+- **Kafka KRaft mode** — Kafka without ZooKeeper (native mode since Kafka 3.x)
 
-## Projetos relacionados
+## 🤖 Agent Architecture
+
+This project was built and code-reviewed using a **multi-agent
+context-optimization workflow**: specialized AI agents each audit a single
+slice of the codebase — manifests, probes, scaling, secrets — within a strict
+context budget. The approach cuts review time and token cost while keeping full
+traceability of every finding.
+
+Methodology, agent templates and the full playbook: **[leonlim3.gumroad.com](https://leonlim3.gumroad.com)**
+
+## Related projects
 
 - [order-processing-api](https://github.com/leonlimask20-dot/order-processing-api) — Clean Architecture + Spring Boot
 - [order-notification-service](https://github.com/leonlimask20-dot/order-notification-service) — Apache Kafka + DLQ
