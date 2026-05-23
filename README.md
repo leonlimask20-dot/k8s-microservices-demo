@@ -1,4 +1,4 @@
-# k8s-microservices-demo
+﻿# k8s-microservices-demo
 
 [![CI - Validate Kubernetes Manifests](https://github.com/leonlimask20-dot/k8s-microservices-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/leonlimask20-dot/k8s-microservices-demo/actions/workflows/ci.yml)
 
@@ -191,7 +191,7 @@ slice of the codebase — manifests, probes, scaling, secrets — within a stric
 context budget. The approach cuts review time and token cost while keeping full
 traceability of every finding.
 
-Methodology, agent templates and the full playbook: **[leonlim3.gumroad.com](https://leonlim3.gumroad.com)**
+Methodology, agent templates and the full playbook: **[Stop Burning Context — Claude Code Playbook](https://leonlim3.gumroad.com/l/claude-code-context-playbook)**
 
 ## Related projects
 
